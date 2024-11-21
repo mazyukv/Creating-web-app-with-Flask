@@ -1,19 +1,28 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for, redirect, session
 app = Flask(__name__)
+#configurations
+app.config['DEBUG'] = True # true when debugging, false when goes live
+app.config['SECRET_KEY'] = 'secret'
 
 @app.route('/<name>')
 def index(name):
+    session.pop('name', None)
     return '<h1>Hello {}!</h1>'.format(name)
 
 @app.route('/home', methods=['GET', 'POST'], defaults={'name': 'Pupsikin'})
 
 @app.route('/home/<string:name>', methods=['POST', 'GET']) #methods to allow different http requests. GET is by default. Can choose strig ot int etc for the variable 
 def home(name):
+    session['name'] = name #all other routes will have access to this name 
     return '<h1>Hello {}, you are on the home page <3</h1>'.format(name)
 
 @app.route('/json')
 def json():
-    return jsonify({'key': 'value1', 'key2': [1,2,3]})
+    if 'name' in session:
+        name = session['name']
+    else:
+        name = 'NotinSession!'
+    return jsonify({'key': 'value1', 'key2': [1,2,3], 'name': name})
 
 @app.route('/query')
 def query():
@@ -33,8 +42,8 @@ def theform():
     else:
         name = request.form['name'] #fetching values from data
         location = request.form['location']
-        return '<h1>Hello {}! You are from {}. You have submitted the form successfully!</h1>'.format(name, location)
-    
+        # return '<h1>Hello {}! You are from {}. You have submitted the form successfully!</h1>'.format(name, location)
+        return redirect(url_for('home', name=name, location=location)) #appends it to the url 
 # @app.route('/process', methods=['POST'])
 # def process():
 #     name = request.form['name'] #fetching values from data
@@ -53,4 +62,4 @@ def processjson():
     return jsonify({'result': 'Success!', 'name': name, 'location': location, 'randomkeyinlist': randomlist[1]})
 
 if __name__ == '__main__':
-    app.run(debug=True) #debug true is to automatically resartapp running after you make a small change. If you save mistake with it, app will crash
+    app.run() #debug true is to automatically resartapp running after you make a small change. If you save mistake with it, app will crash
