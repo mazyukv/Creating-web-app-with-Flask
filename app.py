@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, url_for, redirect, session
+from flask import Flask, jsonify, request, url_for, redirect, session, render_template
 app = Flask(__name__)
 #configurations
 app.config['DEBUG'] = True # true when debugging, false when goes live
@@ -14,7 +14,7 @@ def index(name):
 @app.route('/home/<string:name>', methods=['POST', 'GET']) #methods to allow different http requests. GET is by default. Can choose strig ot int etc for the variable 
 def home(name):
     session['name'] = name #all other routes will have access to this name 
-    return '<h1>Hello {}, you are on the home page <3</h1>'.format(name)
+    return render_template('home.html', name=name, display=False, mylist=['one', 'two', 'three', 'four'], listofdictionaries = [{'name': 'Stepan'}, {'name': 'Irina'}])
 
 @app.route('/json')
 def json():
@@ -34,11 +34,7 @@ def query():
 def theform():
 
     if request.method == 'GET':
-        return '''<form method="POST" action="/theform">
-                    <input type="text" name="name">
-                    <input type="text" name="location">
-                    <input type="submit" value="Submit">
-                    </form>'''
+        return render_template('form.html')
     else:
         name = request.form['name'] #fetching values from data
         location = request.form['location']
